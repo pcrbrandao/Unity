@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.SceneManagement;
+using UnityEngine.SceneManagement;      //Allows us to use SceneManager
+using UnityEngine.UI;
+
 
 namespace Completed
 {
@@ -11,7 +13,7 @@ namespace Completed
 		public int pointsPerFood = 10;              //Number of points to add to player food points when picking up a food object.
 		public int pointsPerSoda = 20;              //Number of points to add to player food points when picking up a soda object.
 		public int wallDamage = 1;                  //How much damage a player does to a wall when chopping it.
-
+		public Text foodText;
 
 		private Animator animator;                  //Used to store a reference to the Player's animator component.
 		private int food;                           //Used to store player food points total during level.
@@ -19,13 +21,13 @@ namespace Completed
 
 		//Start overrides the Start function of MovingObject
 		protected override void Start ()
-		{
+		{ 
 			//Get a component reference to the Player's animator component
 			animator = GetComponent<Animator>();
 
 			//Get the current food point total stored in GameManager.instance between levels.
-			// food = GameManager.instance.playerFoodPoints;
-
+			food = GameManager.instance.playerFoodPoints;
+			updateFoodTextWithPoints (100, "");
 			//Call the Start function of the MovingObject base class.
 			base.Start ();
 		}
@@ -35,14 +37,14 @@ namespace Completed
 		private void OnDisable ()
 		{
 			//When Player object is disabled, store the current local food total in the GameManager so it can be re-loaded in next level.
-			// GameManager.instance.playerFoodPoints = food;
+			GameManager.instance.playerFoodPoints = food;
 		}
 
 
 		private void Update ()
 		{
 			//If it's not the player's turn, exit the function.
-			//if(!GameManager.instance.playersTurn) return;
+			if(!GameManager.instance.playersTurn) return;
 
 			int horizontal = 0;     //Used to store the horizontal move direction.
 			int vertical = 0;       //Used to store the vertical move direction.
@@ -75,6 +77,7 @@ namespace Completed
 		{
 			//Every time player moves, subtract from food points total.
 			food--;
+			updateFoodTextWithPoints(food, "");
 
 			//Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
 			base.AttemptMove <T> (xDir, yDir);
@@ -92,7 +95,7 @@ namespace Completed
 			CheckIfGameOver ();
 
 			//Set the playersTurn boolean of GameManager to false now that players turn is over.
-			// GameManager.instance.playersTurn = false;
+			GameManager.instance.playersTurn = false;
 		}
 
 
@@ -108,6 +111,14 @@ namespace Completed
 
 			//Set the attack trigger of the player's animation controller in order to play the player's attack animation.
 			animator.SetTrigger ("playerChop");
+		}
+
+		private void updateFoodTextWithPoints(int points, string signal) {
+			if (signal == "+" || signal == "-") {
+				foodText.text = signal + points + " Food: " + food;
+			} else if (signal == "") {
+				foodText.text = "Food: " + food;
+			}
 		}
 
 
@@ -129,6 +140,7 @@ namespace Completed
 			{
 				//Add pointsPerFood to the players current food total.
 				food += pointsPerFood;
+				updateFoodTextWithPoints (pointsPerFood, "+");
 
 				//Disable the food object the player collided with.
 				other.gameObject.SetActive (false);
@@ -139,7 +151,7 @@ namespace Completed
 			{
 				//Add pointsPerSoda to players food points total
 				food += pointsPerSoda;
-
+				updateFoodTextWithPoints (pointsPerSoda, "+");
 
 				//Disable the soda object the player collided with.
 				other.gameObject.SetActive (false);
@@ -151,8 +163,7 @@ namespace Completed
 		private void Restart ()
 		{
 			//Load the last scene loaded, in this case Main, the only scene in the game.
-			SceneManager.LoadScene("MainScene");
-			//Application.LoadLevel (Application.loadedLevel);
+			SceneManager.LoadScene (0);
 		}
 
 
@@ -165,6 +176,7 @@ namespace Completed
 
 			//Subtract lost food points from the players total.
 			food -= loss;
+			updateFoodTextWithPoints (loss, "-");
 
 			//Check to see if game has ended.
 			CheckIfGameOver ();
@@ -179,7 +191,7 @@ namespace Completed
 			{
 
 				//Call the GameOver function of GameManager.
-				//GameManager.instance.GameOver ();
+				GameManager.instance.GameOver ();
 			}
 		}
 	}
