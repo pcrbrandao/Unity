@@ -17,6 +17,7 @@ public class SelectOnInput : MonoBehaviour {
 		
 		if (Input.GetAxisRaw ("Vertical") != 0) {
 			eventSystem.SetSelectedGameObject ();
+
 		}
 	}
 }
