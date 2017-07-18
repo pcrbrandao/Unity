@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class RaycastShoot : MonoBehaviour {
 
+	public int gunDamage = 1;
+	public float fireRate = .25f;
+	public float weaponRange
+
 	// Use this for initialization
 	void Start () {
 		
